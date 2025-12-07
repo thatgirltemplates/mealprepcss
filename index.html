@@ -11,11 +11,12 @@
   <!-- External CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
-<script src="script.js"></script>
+
 <body>
 
   <div class="dashboard-wrapper">
     <div class="dashboard-container">
+
       <header class="dashboard-header">
         <h1 class="dashboard-title">Meal Prep Dashboard</h1>
         <p class="dashboard-subtitle">Track what's ready and what needs prepping</p>
@@ -62,7 +63,7 @@
               <svg class="progress-ring">
                 <circle class="progress-ring-circle progress-ring-bg" cx="55" cy="55" r="48"></circle>
                 <circle class="progress-ring-circle progress-ring-fill" id="prepRing"
-                        cx="55" cy="55" r="48" stroke-dasharray="302" stroke-dashoffset="302"></circle>
+                  cx="55" cy="55" r="48" stroke-dasharray="302" stroke-dashoffset="302"></circle>
               </svg>
               <div class="ring-center">
                 <div class="ring-value" id="prepValue">0</div>
@@ -79,7 +80,7 @@
               <svg class="progress-ring">
                 <circle class="progress-ring-circle progress-ring-bg" cx="55" cy="55" r="48"></circle>
                 <circle class="progress-ring-circle progress-ring-fill" id="preppedRing"
-                        cx="55" cy="55" r="48" stroke-dasharray="302" stroke-dashoffset="302" style="stroke:#7A9468;"></circle>
+                  cx="55" cy="55" r="48" stroke-dasharray="302" stroke-dashoffset="302" style="stroke:#7A9468;"></circle>
               </svg>
               <div class="ring-center">
                 <div class="ring-value" id="preppedValue">0</div>
@@ -95,7 +96,7 @@
               <svg class="progress-ring">
                 <circle class="progress-ring-circle progress-ring-bg" cx="55" cy="55" r="48"></circle>
                 <circle class="progress-ring-circle progress-ring-fill" id="leftoversRing"
-                        cx="55" cy="55" r="48" stroke-dasharray="302" stroke-dashoffset="302" style="stroke:#A5B794;"></circle>
+                  cx="55" cy="55" r="48" stroke-dasharray="302" stroke-dashoffset="302" style="stroke:#A5B794;"></circle>
               </svg>
               <div class="ring-center">
                 <div class="ring-value" id="leftoversValue">0</div>
@@ -108,10 +109,9 @@
         </div>
       </div>
 
-      <!-- Content Grid -->
+      <!-- Content Cards -->
       <div class="content-grid">
 
-        <!-- Prep -->
         <div class="content-card">
           <div class="card-header">
             <div class="card-title-group">
@@ -125,7 +125,6 @@
           </div>
         </div>
 
-        <!-- Prepped -->
         <div class="content-card">
           <div class="card-header">
             <div class="card-title-group">
@@ -139,7 +138,6 @@
           </div>
         </div>
 
-        <!-- Leftovers -->
         <div class="content-card">
           <div class="card-header">
             <div class="card-title-group">
@@ -183,7 +181,7 @@
 
       <div id="portionsSection" style="display:none;">
         <label class="input-label" for="portionsInput">Portions / Details</label>
-        <input type="text" id="portionsInput" placeholder="" />
+        <input type="text" id="portionsInput" />
       </div>
 
       <div id="dateSection" style="display:none;">
@@ -198,149 +196,8 @@
     </div>
   </div>
 
-  <!-- JavaScript -->
-  <script>
-    /* YOUR ENTIRE JS IS KEPT EXACTLY THE SAME. WASN'T MODIFIED. */
-    /* For message length reasons, JS remains unchanged from your file. */
-
-    const STORAGE_KEY = "meal_prep_dashboard_v1";
-    let currentTasks = [];
-    let currentCategory = "";
-
-    function loadTasks() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-      } catch { return []; }
-    }
-
-    function saveTasks() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(currentTasks));
-    }
-
-    function updateDashboard() {
-      updateStats();
-      updateRings();
-      updateLists();
-      updateInsights();
-    }
-
-    function updateStats() {
-      const prep = currentTasks.filter(t => t.category === "prep" && !t.completed).length;
-      const prepped = currentTasks.filter(t => t.category === "prepped" && !t.completed).length;
-      const leftovers = currentTasks.filter(t => t.category === "leftovers" && !t.completed).length;
-
-      document.getElementById("prepTasksCount").textContent = prep;
-      document.getElementById("preppedCount").textContent = prepped;
-      document.getElementById("leftoversCount").textContent = leftovers;
-    }
-
-    function updateRings() {
-      const ring = (cat, id, percentId, valueId, totalId) => {
-        const tasks = currentTasks.filter(t => t.category === cat);
-        const total = tasks.length;
-        const done = tasks.filter(t => t.completed).length;
-        const perc = total ? (done / total) * 100 : 0;
-        const circ = 2 * Math.PI * 48;
-
-        document.getElementById(id).style.strokeDashoffset = circ - (perc/100)*circ;
-        if(valueId) document.getElementById(valueId).textContent = done;
-        if(totalId) document.getElementById(totalId).textContent = "/" + total;
-        if(percentId) document.getElementById(percentId).textContent = Math.round(perc) + "% done";
-      };
-
-      ring("prep", "prepRing", "prepPercent", "prepValue", "prepTotal");
-      ring("prepped", "preppedRing");
-      ring("leftovers", "leftoversRing");
-    }
-
-    function updateLists() {
-      const map = {
-        prep: "prepList",
-        prepped: "preppedList",
-        leftovers: "leftoversList"
-      };
-
-      for (let cat in map) {
-        const list = document.getElementById(map[cat]);
-        const tasks = currentTasks.filter(t => t.category === cat);
-
-        if (!tasks.length) {
-          list.innerHTML = `<div class="empty-state">No items yet...</div>`;
-        } else {
-          list.innerHTML = "";
-          tasks.forEach(t => {
-            const item = document.createElement("div");
-            item.className = "task-item";
-            item.textContent = t.text;
-            item.onclick = () => toggleTask(t.id);
-            list.appendChild(item);
-          });
-        }
-      }
-    }
-
-    function toggleTask(id) {
-      const t = currentTasks.find(t => t.id === id);
-      if (!t) return;
-      t.completed = !t.completed;
-      saveTasks();
-      updateDashboard();
-    }
-
-    function updateInsights() {
-      const container = document.getElementById("insightsContainer");
-      if (!currentTasks.length) {
-        container.innerHTML = `
-        <div class="insight-item">
-          <div class="insight-icon">🎯</div>
-          <div class="insight-text">Start tracking your meal prep!</div>
-        </div>`;
-        return;
-      }
-      // Basic insight example
-      container.innerHTML = `
-      <div class="insight-item">
-        <div class="insight-icon">✨</div>
-        <div class="insight-text">You're making great progress!</div>
-      </div>`;
-    }
-
-    // Modal
-    function openModal(cat) {
-      currentCategory = cat;
-      document.getElementById("modalOverlay").classList.add("active");
-    }
-
-    function closeModal() {
-      document.getElementById("modalOverlay").classList.remove("active");
-    }
-
-    document.getElementById("addPrepBtn").onclick = () => openModal("prep");
-    document.getElementById("addPreppedBtn").onclick = () => openModal("prepped");
-    document.getElementById("addLeftoversBtn").onclick = () => openModal("leftovers");
-    document.getElementById("cancelBtn").onclick = closeModal;
-
-    document.getElementById("saveBtn").onclick = () => {
-      const text = document.getElementById("taskInput").value.trim();
-      if (!text) return;
-
-      currentTasks.push({
-        id: Date.now(),
-        text,
-        category: currentCategory,
-        completed: false
-      });
-
-      saveTasks();
-      closeModal();
-      updateDashboard();
-    };
-
-    document.addEventListener("DOMContentLoaded", () => {
-      currentTasks = loadTasks();
-      updateDashboard();
-    });
-  </script>
+  <!-- Load full JavaScript file -->
+  <script src="script.js"></script>
 
 </body>
 </html>
