@@ -1,0 +1,1262 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Meal Prep Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+
+    *, *::before, *::after {
+      box-sizing: inherit;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #F0EFED; /* your brand background */
+      overflow: auto;
+    }
+
+    .dashboard-wrapper {
+      width: 100%;
+      min-height: 100%;
+      padding: 24px 16px;
+    }
+
+    .dashboard-container {
+      max-width: 980px; /* Notion-friendly width */
+      margin: 0 auto;
+    }
+
+    .dashboard-header {
+      text-align: center;
+      margin-bottom: 28px;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .dashboard-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 36px;
+      font-weight: 500;
+      color: #4A5F3D;
+      margin: 0 0 4px 0;
+      letter-spacing: 0.4px;
+    }
+
+    .dashboard-subtitle {
+      font-size: 13px;
+      font-weight: 400;
+      color: rgba(74, 95, 61, 0.7);
+      margin: 4;
+      letter-spacing: 0.8px;
+    }
+
+    /* Stats Overview Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+      animation: fadeIn 0.8s ease-out 0.1s backwards;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%);
+      border-radius: 18px;
+      padding: 18px 18px 16px;
+      border: 1px solid rgba(107, 130, 89, 0.15);
+      box-shadow: 0 4px 18px rgba(74, 95, 61, 0.08);
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(74, 95, 61, 0.14);
+      border-color: rgba(107, 130, 89, 0.25);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(107, 130, 89, 0.5), transparent);
+    }
+
+    .stat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.6px;
+      color: rgba(74, 95, 61, 0.7);
+    }
+
+    .stat-icon {
+      font-size: 20px;
+      opacity: 0.8;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 600;
+      color: #4A5F3D;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-description {
+      font-size: 12px;
+      color: rgba(74, 95, 61, 0.65);
+      line-height: 1.4;
+    }
+
+    /* Progress Ring Card */
+    .progress-card {
+      background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%);
+      border-radius: 20px;
+      padding: 20px 22px 22px;
+      border: 1px solid rgba(107, 130, 89, 0.15);
+      box-shadow: 0 4px 16px rgba(74, 95, 61, 0.08);
+      margin-bottom: 24px;
+      animation: fadeIn 0.8s ease-out 0.2s backwards;
+    }
+
+    .progress-card h3 {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #4A5F3D;
+      margin: 0 0 16px 0;
+      text-align: center;
+    }
+
+    .progress-rings {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .progress-ring-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ring-wrapper {
+      position: relative;
+      width: 110px;
+      height: 110px;
+    }
+
+    .progress-ring {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+
+    .progress-ring-circle {
+      fill: none;
+      stroke-width: 8;
+      transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .progress-ring-bg {
+      stroke: rgba(107, 130, 89, 0.12);
+    }
+
+    .progress-ring-fill {
+      stroke: #6B8259;
+      stroke-linecap: round;
+    }
+
+    .ring-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .ring-value {
+      font-size: 22px;
+      font-weight: 600;
+      color: #4A5F3D;
+      line-height: 1;
+    }
+
+    .ring-total {
+      font-size: 11px;
+      color: rgba(74, 95, 61, 0.5);
+    }
+
+    .ring-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      color: rgba(74, 95, 61, 0.75);
+      text-align: center;
+    }
+
+    .ring-sublabel {
+      font-size: 10px;
+      color: rgba(74, 95, 61, 0.6);
+      text-align: center;
+    }
+
+    /* Main Content Grid */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 1100px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (min-width: 1101px) and (max-width: 1400px) {
+      .content-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .content-grid .content-card:last-child {
+        grid-column: 1 / -1;
+      }
+    }
+
+    .content-card {
+      background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%);
+      border-radius: 20px;
+      padding: 20px 22px 22px;
+      border: 1px solid rgba(107, 130, 89, 0.15);
+      box-shadow: 0 4px 16px rgba(74, 95, 61, 0.08);
+      animation: fadeIn 0.8s ease-out backwards;
+    }
+
+    .content-card:nth-child(1) { animation-delay: 0.25s; }
+    .content-card:nth-child(2) { animation-delay: 0.3s; }
+    .content-card:nth-child(3) { animation-delay: 0.35s; }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(107, 130, 89, 0.13);
+    }
+
+    .card-title-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-icon {
+      font-size: 20px;
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.8px;
+      color: #4A5F3D;
+      margin: 0;
+    }
+
+    .add-btn {
+      background: linear-gradient(135deg, #6B8259 0%, #5D7150 100%);
+      border: none;
+      color: #FFFFFF;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(107, 130, 89, 0.25);
+    }
+
+    .add-btn:hover {
+      transform: scale(1.05) rotate(90deg);
+      box-shadow: 0 6px 18px rgba(107, 130, 89, 0.32);
+    }
+
+    .add-btn:active {
+      transform: scale(0.98) rotate(90deg);
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .task-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .task-list::-webkit-scrollbar-track {
+      background: rgba(107, 130, 89, 0.04);
+      border-radius: 3px;
+    }
+
+    .task-list::-webkit-scrollbar-thumb {
+      background: rgba(107, 130, 89, 0.22);
+      border-radius: 3px;
+    }
+
+    .task-list::-webkit-scrollbar-thumb:hover {
+      background: rgba(107, 130, 89, 0.3);
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 12px;
+      border: 1px solid rgba(107, 130, 89, 0.12);
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .task-item:hover {
+      border-color: rgba(107, 130, 89, 0.25);
+      background: rgba(255, 255, 255, 0.96);
+      transform: translateX(2px);
+      box-shadow: 0 3px 10px rgba(74, 95, 61, 0.08);
+    }
+
+    .task-item.completed {
+      opacity: 0.55;
+    }
+
+    .checkbox {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(107, 130, 89, 0.55);
+      border-radius: 6px;
+      flex-shrink: 0;
+      position: relative;
+      transition: all 0.25s ease;
+      background: #FFFFFF;
+    }
+
+    .checkbox.checked {
+      background: linear-gradient(135deg, #6B8259 0%, #5D7150 100%);
+      border-color: #5D7150;
+    }
+
+    .checkbox.checked::after {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 2px;
+      width: 4px;
+      height: 9px;
+      border: solid #FFFFFF;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+
+    .task-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .task-text {
+      font-size: 13px;
+      font-weight: 500;
+      color: #4A5F3D;
+      line-height: 1.4;
+      margin-bottom: 2px;
+    }
+
+    .task-item.completed .task-text {
+      text-decoration: line-through;
+      color: rgba(74, 95, 61, 0.45);
+    }
+
+    .task-meta {
+      font-size: 11px;
+      color: rgba(74, 95, 61, 0.55);
+      margin-top: 2px;
+    }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: rgba(107, 130, 89, 0.3);
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      padding: 2px;
+      opacity: 0;
+      transition: all 0.25s ease;
+      flex-shrink: 0;
+    }
+
+    .task-item:hover .delete-btn {
+      opacity: 1;
+    }
+
+    .delete-btn:hover {
+      color: #C69D67;
+      transform: scale(1.1);
+    }
+
+    .empty-state {
+      padding: 32px 12px;
+      text-align: center;
+      color: rgba(74, 95, 61, 0.5);
+      font-size: 12px;
+      font-style: italic;
+    }
+
+    .insights-card h3 {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin: 0 0 14px 0;
+      opacity: 0.9;
+    }
+
+    .insight-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .insight-value {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 6px 0;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(26, 22, 19, 0.7);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal {
+      background: linear-gradient(135deg, #FFFFFF 0%, #F9F7F4 100%);
+      border-radius: 20px;
+      padding: 24px 22px 20px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(107, 130, 89, 0.2);
+      animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .modal h3 {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 24px;
+      font-weight: 500;
+      color: #4A5F3D;
+      margin: 0 0 18px 0;
+      text-align: center;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(74, 95, 61, 0.8);
+      text-transform: uppercase;
+      letter-spacing: 1.4px;
+      margin-bottom: 6px;
+      margin-top: 12px;
+    }
+
+    .input-label:first-of-type {
+      margin-top: 0;
+    }
+
+    .modal input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid rgba(107, 130, 89, 0.25);
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: #4A5F3D;
+      background: #FFFFFF;
+      transition: all 0.25s ease;
+      outline: none;
+    }
+
+    .modal input:focus {
+      border-color: #6B8259;
+      box-shadow: 0 0 0 3px rgba(107, 130, 89, 0.16);
+    }
+
+    .modal input::placeholder {
+      color: rgba(74, 95, 61, 0.4);
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 999px;
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+    }
+
+    .modal-btn.primary {
+      background: linear-gradient(135deg, #6B8259 0%, #5D7150 100%);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(107, 130, 89, 0.25);
+    }
+
+    .modal-btn.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(107, 130, 89, 0.34);
+    }
+
+    .modal-btn.primary:active {
+      transform: translateY(0);
+    }
+
+    .modal-btn.secondary {
+      background: rgba(107, 130, 89, 0.08);
+      color: #6B8259;
+      border: 1px solid rgba(107, 130, 89, 0.2);
+    }
+
+    .modal-btn.secondary:hover {
+      background: rgba(107, 130, 89, 0.15);
+      border-color: rgba(107, 130, 89, 0.28);
+    }
+
+    .limit-warning {
+      background: linear-gradient(135deg, rgba(212, 165, 116, 0.18) 0%, rgba(212, 165, 116, 0.09) 100%);
+      border: 1px solid rgba(212, 165, 116, 0.3);
+      border-radius: 14px;
+      padding: 10px 12px;
+      margin-top: 18px;
+      text-align: center;
+      font-size: 12px;
+      color: #C69D67;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .limit-warning.active {
+      display: block;
+    }
+
+    @media (max-width: 600px) {
+      .dashboard-title {
+        font-size: 30px;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      .progress-rings {
+        flex-direction: column;
+      }
+      .ring-wrapper {
+        width: 100px;
+        height: 100px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="dashboard-wrapper">
+    <div class="dashboard-container">
+      <header class="dashboard-header">
+        <h1 class="dashboard-title">Meal Prep Dashboard</h1>
+        <p class="dashboard-subtitle">Track what's ready and what needs prepping</p>
+      </header>
+
+      <!-- Stats Overview -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-label">Prep Tasks</span>
+            <span class="stat-icon">👨‍🍳</span>
+          </div>
+          <div class="stat-value" id="prepTasksCount">0</div>
+          <div class="stat-description" id="prepTasksDesc">Tasks to complete</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-label">Prepped Meals</span>
+            <span class="stat-icon">🍱</span>
+          </div>
+          <div class="stat-value" id="preppedCount">0</div>
+          <div class="stat-description">Ready-to-eat meals</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <span class="stat-label">Leftovers</span>
+            <span class="stat-icon">🥡</span>
+          </div>
+          <div class="stat-value" id="leftoversCount">0</div>
+          <div class="stat-description">Available leftovers</div>
+        </div>
+      </div>
+
+      <!-- Progress Rings -->
+      <div class="progress-card">
+        <h3>Your Prep Status</h3>
+        <div class="progress-rings">
+          <div class="progress-ring-container">
+            <div class="ring-wrapper">
+              <svg class="progress-ring">
+                <circle class="progress-ring-circle progress-ring-bg" cx="55" cy="55" r="48" />
+                <circle class="progress-ring-circle progress-ring-fill" id="prepRing"
+                        cx="55" cy="55" r="48"
+                        stroke-dasharray="302" stroke-dashoffset="302" />
+              </svg>
+              <div class="ring-center">
+                <div class="ring-value" id="prepValue">0</div>
+                <div class="ring-total" id="prepTotal">/0</div>
+              </div>
+            </div>
+            <div class="ring-label">Prep Tasks</div>
+            <div class="ring-sublabel" id="prepPercent">0% done</div>
+          </div>
+
+          <div class="progress-ring-container">
+            <div class="ring-wrapper">
+              <svg class="progress-ring">
+                <circle class="progress-ring-circle progress-ring-bg" cx="55" cy="55" r="48" />
+                <circle class="progress-ring-circle progress-ring-fill" id="preppedRing"
+                        cx="55" cy="55" r="48"
+                        stroke-dasharray="302" stroke-dashoffset="302"
+                        style="stroke:#7A9468;" />
+              </svg>
+              <div class="ring-center">
+                <div class="ring-value" id="preppedValue">0</div>
+              </div>
+            </div>
+            <div class="ring-label">Prepped Meals</div>
+            <div class="ring-sublabel" id="preppedPercent">0 ready</div>
+          </div>
+
+          <div class="progress-ring-container">
+            <div class="ring-wrapper">
+              <svg class="progress-ring">
+                <circle class="progress-ring-circle progress-ring-bg" cx="55" cy="55" r="48" />
+                <circle class="progress-ring-circle progress-ring-fill" id="leftoversRing"
+                        cx="55" cy="55" r="48"
+                        stroke-dasharray="302" stroke-dashoffset="302"
+                        style="stroke:#A5B794;" />
+              </svg>
+              <div class="ring-center">
+                <div class="ring-value" id="leftoversValue">0</div>
+              </div>
+            </div>
+            <div class="ring-label">Leftovers</div>
+            <div class="ring-sublabel" id="leftoversPercent">0 available</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="content-grid">
+        <div class="content-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon">👨‍🍳</span>
+              <h3 class="card-title">Prep Tasks</h3>
+            </div>
+            <button class="add-btn" id="addPrepBtn" aria-label="Add prep task">+</button>
+          </div>
+          <div class="task-list" id="prepList">
+            <div class="empty-state">Add the prep work you need to do...</div>
+          </div>
+        </div>
+
+        <div class="content-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon">🍱</span>
+              <h3 class="card-title">Prepped Meals</h3>
+            </div>
+            <button class="add-btn" id="addPreppedBtn" aria-label="Add prepped meal">+</button>
+          </div>
+          <div class="task-list" id="preppedList">
+            <div class="empty-state">Track meals you've prepped and portioned...</div>
+          </div>
+        </div>
+
+        <div class="content-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-icon">🥡</span>
+              <h3 class="card-title">Leftovers</h3>
+            </div>
+            <button class="add-btn" id="addLeftoversBtn" aria-label="Add leftover">+</button>
+          </div>
+          <div class="task-list" id="leftoversList">
+            <div class="empty-state">Track leftovers from meals you've eaten...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Insights -->
+      <div class="insights-card" id="insightsCard">
+        <h3>💡 Quick Overview</h3>
+  <div id="insightsContainer">
+  <div class="insight-item">
+    <div class="insight-icon">🎯</div>
+    <div class="insight-text">
+      Start tracking your meal prep to see what's ready and what needs doing!
+    </div>
+  </div>
+</div>
+
+      </div>
+
+      <div class="limit-warning" id="limitWarning">
+        You've reached the maximum of 999 items. Please delete some items to add more.
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h3 id="modalTitle">Add Item</h3>
+
+      <label class="input-label" for="taskInput">Item Name</label>
+      <input type="text" id="taskInput" placeholder="Enter item name..." autocomplete="off">
+
+      <div id="portionsSection" style="display:none;">
+        <label class="input-label" for="portionsInput">Portions / Details</label>
+        <input type="text" id="portionsInput" placeholder="e.g., 3 portions..." autocomplete="off">
+      </div>
+
+      <!-- NEW: Date section for cooked date -->
+      <div id="dateSection" style="display:none;">
+        <label class="input-label" for="dateInput">Date Cooked</label>
+        <input type="date" id="dateInput" autocomplete="off">
+      </div>
+
+      <div class="modal-buttons">
+        <button class="modal-btn secondary" id="cancelBtn">Cancel</button>
+        <button class="modal-btn primary" id="saveBtn">Add Item</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --------- DATA MODEL (localStorage) ----------
+    const STORAGE_KEY = "meal_prep_dashboard_v1";
+
+    let currentTasks = [];
+    let currentCategory = "";
+
+    function loadTasks() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveTasks() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(currentTasks));
+      } catch {
+        // ignore
+      }
+    }
+
+    // --------- DASHBOARD UPDATE ----------
+    function updateDashboard() {
+      updateStats();
+      updateProgressRings();
+      updateTaskLists();
+      updateInsights();
+    }
+
+    function updateStats() {
+      const prepTasks = currentTasks.filter(t => t.category === "prep");
+      const prepRemaining = prepTasks.filter(t => !t.completed).length;
+
+      const preppedMeals = currentTasks.filter(
+        t => t.category === "prepped" && !t.completed
+      ).length;
+
+      const leftovers = currentTasks.filter(
+        t => t.category === "leftovers" && !t.completed
+      ).length;
+
+      document.getElementById("prepTasksCount").textContent = prepRemaining;
+      document.getElementById("prepTasksDesc").textContent =
+        prepRemaining === 0 && prepTasks.length > 0
+          ? "All done!"
+          : "Tasks to complete";
+      document.getElementById("preppedCount").textContent = preppedMeals;
+      document.getElementById("leftoversCount").textContent = leftovers;
+    }
+
+    function updateProgressRings() {
+      const prepTasks = currentTasks.filter(t => t.category === "prep");
+      const prepTotal = prepTasks.length;
+      const prepCompleted = prepTasks.filter(t => t.completed).length;
+      const prepPercentage = prepTotal > 0
+        ? (prepCompleted / prepTotal) * 100
+        : 0;
+
+      const circumference = 2 * Math.PI * 48;
+      const prepOffset = circumference - (prepPercentage / 100) * circumference;
+
+      document.getElementById("prepRing").style.strokeDashoffset = prepOffset;
+      document.getElementById("prepValue").textContent = prepCompleted;
+      document.getElementById("prepTotal").textContent = `/${prepTotal}`;
+      document.getElementById("prepPercent").textContent =
+        `${Math.round(prepPercentage)}% done`;
+
+      const preppedCount = currentTasks.filter(
+        t => t.category === "prepped" && !t.completed
+      ).length;
+      const preppedOffset = preppedCount > 0 ? 0 : circumference;
+      document.getElementById("preppedRing").style.strokeDashoffset = preppedOffset;
+      document.getElementById("preppedValue").textContent = preppedCount;
+      document.getElementById("preppedPercent").textContent =
+        `${preppedCount} ready`;
+
+      const leftoversCount = currentTasks.filter(
+        t => t.category === "leftovers" && !t.completed
+      ).length;
+      const leftoversOffset = leftoversCount > 0 ? 0 : circumference;
+      document.getElementById("leftoversRing").style.strokeDashoffset = leftoversOffset;
+      document.getElementById("leftoversValue").textContent = leftoversCount;
+      document.getElementById("leftoversPercent").textContent =
+        `${leftoversCount} available`;
+    }
+
+    function updateTaskLists() {
+      ["prep", "prepped", "leftovers"].forEach(category => {
+        const listId =
+          category === "prep"
+            ? "prepList"
+            : category === "prepped"
+            ? "preppedList"
+            : "leftoversList";
+
+        const listElement = document.getElementById(listId);
+        const categoryTasks = currentTasks.filter(t => t.category === category);
+
+        if (categoryTasks.length === 0) {
+          listElement.innerHTML =
+            `<div class="empty-state">${getEmptyMessage(category)}</div>`;
+        } else {
+          listElement.innerHTML = "";
+          categoryTasks.forEach(task => {
+            listElement.appendChild(createTaskElement(task));
+          });
+        }
+      });
+    }
+
+    function getEmptyMessage(category) {
+      const messages = {
+        prep: "Add the prep work you need to do...",
+        prepped: "Track meals you've prepped and portioned...",
+        leftovers: "Track leftovers from meals you've eaten..."
+      };
+      return messages[category];
+    }
+
+    function createTaskElement(task) {
+      const item = document.createElement("div");
+      item.className = "task-item";
+      item.dataset.taskId = task.id;
+      if (task.completed) item.classList.add("completed");
+
+      const checkbox = document.createElement("div");
+      checkbox.className = "checkbox";
+      if (task.completed) checkbox.classList.add("checked");
+
+      const content = document.createElement("div");
+      content.className = "task-content";
+
+      const text = document.createElement("div");
+      text.className = "task-text";
+      text.textContent = task.text;
+      content.appendChild(text);
+
+      // Portions line for prepped & leftovers
+      if (task.portions && (task.category === "prepped" || task.category === "leftovers")) {
+        const meta = document.createElement("div");
+        meta.className = "task-meta";
+        meta.textContent = task.portions;
+        content.appendChild(meta);
+      }
+
+      // Freshness line: "X days old" with color
+      if ((task.category === "prepped" || task.category === "leftovers") && task.cookedDate) {
+        const freshness = document.createElement("div");
+        freshness.className = "task-meta";
+
+        const cooked = new Date(task.cookedDate);
+        if (!isNaN(cooked)) {
+          const now = new Date();
+          const diffMs = now - cooked;
+          const daysOld = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+
+          // Color coding
+          if (daysOld <= 2) {
+            freshness.style.color = "#6B8259"; // green
+          } else if (daysOld <= 4) {
+            freshness.style.color = "#C69D67"; // yellow
+          } else {
+            freshness.style.color = "#B25C5C"; // red
+          }
+
+          freshness.textContent = `${daysOld} day${daysOld !== 1 ? "s" : ""} old`;
+          content.appendChild(freshness);
+        }
+      }
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "delete-btn";
+      deleteBtn.textContent = "×";
+      deleteBtn.setAttribute("aria-label", "Delete item");
+      deleteBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        deleteTask(task.id);
+      });
+
+      item.appendChild(checkbox);
+      item.appendChild(content);
+      item.appendChild(deleteBtn);
+
+      item.addEventListener("click", () => toggleTask(task.id));
+
+      return item;
+    }
+
+    function updateInsights() {
+      const container = document.getElementById("insightsContainer");
+
+      // If no tasks: show starter message
+      if (currentTasks.length === 0) {
+        container.innerHTML = `
+          <div class="insight-item">
+            <div class="insight-line">
+              <div class="insight-icon">🎯</div>
+              <div class="insight-text">
+                Start tracking your meal prep to see what's ready and what needs doing!
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      const insights = [];
+
+      const prepTasks = currentTasks.filter(t => t.category === "prep");
+      const prepRemaining = prepTasks.filter(t => !t.completed).length;
+
+      if (prepRemaining > 0) {
+    insights.push(`
+  <div class="insight-item">
+    <div class="insight-icon">📋</div>
+    <div class="insight-text">
+      ${prepRemaining} ${prepRemaining === 1 ? "prep task" : "prep tasks"} left to complete
+    </div>
+  </div>
+`);
+
+      } else if (prepTasks.length > 0) {
+        insights.push(`
+          <div class="insight-item">
+            <div class="insight-icon">🎉</div>
+            <div class="insight-text">All prep tasks complete! Beautiful work.</div>
+          </div>
+        `);
+      }
+
+      const preppedCount = currentTasks.filter(
+        t => t.category === "prepped" && !t.completed
+      ).length;
+      const leftoversCount = currentTasks.filter(
+        t => t.category === "leftovers" && !t.completed
+      ).length;
+      const totalReadyToEat = preppedCount + leftoversCount;
+
+      if (totalReadyToEat > 0) {
+        insights.push(`
+          <div class="insight-item">
+            <div class="insight-icon">✨</div>
+            <div class="insight-value">${totalReadyToEat}</div>
+            <div class="insight-text">
+              ${totalReadyToEat === 1 ? "meal" : "meals"} ready to eat this week.
+            </div>
+          </div>
+        `);
+      }
+
+      if (insights.length === 0) {
+        insights.push(`
+          <div class="insight-item">
+            <div class="insight-icon">👍</div>
+            <div class="insight-text">
+              You're all set. Add items as you prep this week.
+            </div>
+          </div>
+        `);
+      }
+
+      container.innerHTML = insights.join("");
+    }
+
+    // --------- TASK ACTIONS ----------
+    function toggleTask(id) {
+      const idx = currentTasks.findIndex(t => t.id === id);
+      if (idx === -1) return;
+      currentTasks[idx].completed = !currentTasks[idx].completed;
+      saveTasks();
+      updateDashboard();
+    }
+
+    function deleteTask(id) {
+      currentTasks = currentTasks.filter(t => t.id !== id);
+      saveTasks();
+      updateDashboard();
+    }
+
+    // --------- MODAL ----------
+    function openModal(category) {
+      if (currentTasks.length >= 999) {
+        showLimit();
+        return;
+      }
+
+      currentCategory = category;
+      const modal = document.getElementById("modalOverlay");
+      const input = document.getElementById("taskInput");
+      const title = document.getElementById("modalTitle");
+      const portionsSection = document.getElementById("portionsSection");
+      const portionsInput = document.getElementById("portionsInput");
+      const dateSection = document.getElementById("dateSection");
+      const dateInput = document.getElementById("dateInput");
+
+      const titles = {
+        prep: "Add Prep Task",
+        prepped: "Add Prepped Meal",
+        leftovers: "Add Leftover"
+      };
+
+      const placeholders = {
+        prep: "e.g., Chop vegetables, cook rice, marinate chicken",
+        prepped: "e.g., Chicken burrito bowl, Pasta salad",
+        leftovers: "e.g., Leftover pasta from dinner"
+      };
+
+      title.textContent = titles[category];
+      input.placeholder = placeholders[category];
+      input.value = "";
+
+      if (category === "prepped" || category === "leftovers") {
+        portionsSection.style.display = "block";
+        portionsInput.value = "";
+        portionsInput.placeholder =
+          category === "prepped" ? "e.g., 3 portions" : "e.g., 2 portions";
+
+        dateSection.style.display = "block";
+        dateInput.value = "";
+      } else {
+        portionsSection.style.display = "none";
+        dateSection.style.display = "none";
+      }
+
+      modal.classList.add("active");
+      setTimeout(() => input.focus(), 80);
+    }
+
+    function closeModal() {
+      document.getElementById("modalOverlay").classList.remove("active");
+      currentCategory = "";
+    }
+
+    function showLimit() {
+      const warning = document.getElementById("limitWarning");
+      warning.classList.add("active");
+      setTimeout(() => warning.classList.remove("active"), 4000);
+    }
+
+    function saveTask() {
+      const input = document.getElementById("taskInput");
+      const text = input.value.trim();
+      if (!text) return;
+
+      if (currentTasks.length >= 999) {
+        closeModal();
+        showLimit();
+        return;
+      }
+
+      let portions = "";
+      let cookedDate = "";
+      if (currentCategory === "prepped" || currentCategory === "leftovers") {
+        portions = document.getElementById("portionsInput").value.trim();
+        cookedDate = document.getElementById("dateInput").value;
+      }
+
+      const newTask = {
+        id: `task-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+        text,
+        completed: false,
+        category: currentCategory,
+        portions,
+        cookedDate,
+        createdAt: new Date().toISOString()
+      };
+
+      currentTasks.push(newTask);
+      saveTasks();
+      closeModal();
+      updateDashboard();
+    }
+
+    // --------- TOAST ----------
+    function showToast(message) {
+      const toast = document.createElement("div");
+      toast.style.cssText = `
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #6B8259 0%, #5D7150 100%);
+        color: #FFFFFF;
+        padding: 10px 18px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 500;
+        z-index: 2000;
+        box-shadow: 0 6px 20px rgba(74, 95, 61, 0.35);
+      `;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2600);
+    }
+
+    // --------- EVENT LISTENERS ----------
+    document.getElementById("addPrepBtn").addEventListener("click", () => openModal("prep"));
+    document.getElementById("addPreppedBtn").addEventListener("click", () => openModal("prepped"));
+    document.getElementById("addLeftoversBtn").addEventListener("click", () => openModal("leftovers"));
+    document.getElementById("cancelBtn").addEventListener("click", closeModal);
+    document.getElementById("saveBtn").addEventListener("click", saveTask);
+
+    document.getElementById("taskInput").addEventListener("keypress", e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        saveTask();
+      }
+    });
+
+    document.getElementById("modalOverlay").addEventListener("click", e => {
+      if (e.target.id === "modalOverlay") closeModal();
+    });
+
+    // --------- INIT ----------
+    document.addEventListener("DOMContentLoaded", () => {
+      currentTasks = loadTasks();
+      updateDashboard();
+      showToast("Meal Prep Dashboard ready ✨");
+    });
+  </script>
+</body>
+</html>
